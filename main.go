@@ -25,6 +25,21 @@ func main() {
 	InitConfig(env)
 	INFO.Printf("Start application in [%s] env with [%d] concurrent users", env, concurrentUsers)
 
+	ticker := time.NewTicker(5 * time.Minute)
+	quit := make(chan struct{})
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				printResults()
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
 	mutex := sync.Mutex{}
 	tokenChan := make(chan string)
 	tokens := make([]string, 0)
@@ -44,7 +59,9 @@ func main() {
 		DEBUG.Printf("received token")
 	}
 
-	time.Sleep(time.Second * 10)
+	DEBUG.Printf("start waiting 30 sec")
+
+	time.Sleep(time.Second * 30)
 
 	DEBUG.Printf("run user lifecycle")
 	//run user lifecycle
@@ -58,6 +75,13 @@ func main() {
 		_ = <-finishUserJobChan
 	}
 
+	quit <- struct{}{}
+	time.Sleep(time.Second)
+
+	printResults()
+}
+
+func printResults() {
 	INFO.Printf("%s counter : %v", USER_COUNTER, expvar.Get(USER_COUNTER).(metric.Metric))
 	INFO.Printf("%s counter : %v", PHOTO_COUNTER, expvar.Get(PHOTO_COUNTER).(metric.Metric))
 	INFO.Printf("%s histogram : %v", CREATE_USER_TIME, expvar.Get(CREATE_USER_TIME).(metric.Metric))

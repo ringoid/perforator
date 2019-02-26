@@ -32,14 +32,17 @@ func NewFacesMethod(token string, lastActionTime int64) []commons.Profile {
 	startTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 	for {
 		ok, resp := GetNewFaces(token, PhotoResolution1080x1440, lastActionTime)
-		if ok && resp.RepeatRequestAfterSec == 0 {
+		if ok && resp.RepeatRequestAfter == 0 {
 			finishTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 			expvar.Get(NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(NEW_FACES_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
 			DEBUG.Printf("new faces request was successfull with profiles num [%d]", len(resp.Profiles))
 			return resp.Profiles
 		}
-		time.Sleep(time.Millisecond * 100)
+		if resp != nil && resp.RepeatRequestAfter != 0 {
+			DEBUG.Printf("new faces return repeat after sec [%v]", resp.RepeatRequestAfter)
+			time.Sleep(time.Millisecond * 100)
+		}
 	}
 }
 
@@ -48,7 +51,7 @@ func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons
 	startTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 	for {
 		ok, resp := GetLMM(token, PhotoResolution1440x1920, lastActionTime)
-		if ok && resp.RepeatRequestAfterSec == 0 {
+		if ok && resp.RepeatRequestAfter == 0 {
 			finishTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 			expvar.Get(LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(LMM_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
@@ -56,7 +59,10 @@ func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons
 				len(resp.LikesYou), len(resp.Matches), len(resp.Messages))
 			return resp.LikesYou, resp.Matches, resp.Messages
 		}
-		time.Sleep(time.Millisecond * 100)
+		if resp != nil && resp.RepeatRequestAfter != 0 {
+			DEBUG.Printf("lmm return repeat after sec [%v]", resp.RepeatRequestAfter)
+			time.Sleep(time.Millisecond * 100)
+		}
 	}
 }
 

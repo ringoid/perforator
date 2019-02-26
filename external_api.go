@@ -162,8 +162,8 @@ func (resp ActionResponse) String() string {
 
 type GetNewFacesFeedResp struct {
 	commons.BaseResponse
-	Profiles              []commons.Profile `json:"profiles"`
-	RepeatRequestAfterSec int               `json:"repeatRequestAfterSec"`
+	Profiles           []commons.Profile `json:"profiles"`
+	RepeatRequestAfter int64             `json:"repeatRequestAfter"`
 }
 
 func (resp GetNewFacesFeedResp) String() string {
@@ -172,10 +172,10 @@ func (resp GetNewFacesFeedResp) String() string {
 
 type LMMFeedResp struct {
 	commons.BaseResponse
-	LikesYou              []commons.Profile `json:"likesYou"`
-	Matches               []commons.Profile `json:"matches"`
-	Messages              []commons.Profile `json:"messages"`
-	RepeatRequestAfterSec int               `json:"repeatRequestAfterSec"`
+	LikesYou           []commons.Profile `json:"likesYou"`
+	Matches            []commons.Profile `json:"matches"`
+	Messages           []commons.Profile `json:"messages"`
+	RepeatRequestAfter int64             `json:"repeatRequestAfter"`
 }
 
 func (resp LMMFeedResp) String() string {
