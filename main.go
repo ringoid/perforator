@@ -92,4 +92,10 @@ func printResults() {
 	INFO.Printf("%s counter : %v", SUBMITED_ACTIONS_COUNTER, expvar.Get(SUBMITED_ACTIONS_COUNTER).(metric.Metric))
 	INFO.Printf("%s counter : %v", ACTION_REQUEST_COUNTER, expvar.Get(ACTION_REQUEST_COUNTER).(metric.Metric))
 	INFO.Printf("%s histogram : %v", ACTION_REQUEST_TIME, expvar.Get(ACTION_REQUEST_TIME).(metric.Metric))
+
+	INFO.Printf("%s counter : %v", SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER, expvar.Get(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER).(metric.Metric))
+	INFO.Printf("%s counter : %v", FAILED_NEW_FACES_REQUEST_COUNTER, expvar.Get(FAILED_NEW_FACES_REQUEST_COUNTER).(metric.Metric))
+	INFO.Printf("%s counter : %v", SUCCESSFULLY_LMM_REQUEST_COUNTER, expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric))
+	INFO.Printf("%s counter : %v", FAILED_LMM_REQUEST_COUNTER, expvar.Get(FAILED_LMM_REQUEST_COUNTER).(metric.Metric))
+
 }

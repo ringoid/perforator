@@ -29,6 +29,12 @@ const (
 	SUBMITED_ACTIONS_COUNTER  = "ActionsCounter"
 	ACTION_REQUEST_COUNTER    = "ActionRequestCounter"
 	ACTION_REQUEST_TIME       = "ActionRequestTime"
+
+	SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER = "SuccessfullyNewFacesRequestCounter"
+	FAILED_NEW_FACES_REQUEST_COUNTER = "FailedNewFacesRequestCounter"
+
+	SUCCESSFULLY_LMM_REQUEST_COUNTER = "SuccessfullyLmmRequestCounter"
+	FAILED_LMM_REQUEST_COUNTER = "FailedLmmRequestCounter"
 )
 
 func InitConfig(env string) {
@@ -57,4 +63,9 @@ func InitConfig(env string) {
 	expvar.Publish(SUBMITED_ACTIONS_COUNTER, metric.NewCounter())
 	expvar.Publish(ACTION_REQUEST_COUNTER, metric.NewCounter())
 	expvar.Publish(ACTION_REQUEST_TIME, metric.NewHistogram())
+
+	expvar.Publish(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER, metric.NewCounter())
+	expvar.Publish(FAILED_NEW_FACES_REQUEST_COUNTER, metric.NewCounter())
+	expvar.Publish(SUCCESSFULLY_LMM_REQUEST_COUNTER, metric.NewCounter())
+	expvar.Publish(FAILED_LMM_REQUEST_COUNTER, metric.NewCounter())
 }

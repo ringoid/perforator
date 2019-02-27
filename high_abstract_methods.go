@@ -34,14 +34,21 @@ func NewFacesMethod(token string, lastActionTime int64) []commons.Profile {
 		ok, resp := GetNewFaces(token, PhotoResolution1080x1440, lastActionTime)
 		if ok && resp.RepeatRequestAfter == 0 {
 			finishTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
+			expvar.Get(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(NEW_FACES_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
 			DEBUG.Printf("new faces request was successfull with profiles num [%d]", len(resp.Profiles))
 			return resp.Profiles
 		}
-		if resp != nil && resp.RepeatRequestAfter != 0 {
+		if ok && resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("new faces return repeat after sec [%v]", resp.RepeatRequestAfter)
 			time.Sleep(time.Millisecond * 100)
+			expvar.Get(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
+		}
+		if !ok {
+			DEBUG.Printf("failed new faces request, drop counter and repeat")
+			expvar.Get(FAILED_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
+			startTime = time.Now().Round(time.Millisecond).UnixNano() / 1000000
 		}
 	}
 }
@@ -53,6 +60,7 @@ func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons
 		ok, resp := GetLMM(token, PhotoResolution1440x1920, lastActionTime)
 		if ok && resp.RepeatRequestAfter == 0 {
 			finishTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
+			expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(LMM_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
 			DEBUG.Printf("lmm request was successfull with likes num [%d], matches num [%d], messages num [%d]",
@@ -61,7 +69,13 @@ func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons
 		}
 		if resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("lmm return repeat after sec [%v]", resp.RepeatRequestAfter)
+			expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
 			time.Sleep(time.Millisecond * 100)
+		}
+		if !ok {
+			DEBUG.Printf("failed llm request, drop counter and repeat")
+			expvar.Get(FAILED_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
+			startTime = time.Now().Round(time.Millisecond).UnixNano() / 1000000
 		}
 	}
 }
