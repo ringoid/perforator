@@ -31,10 +31,16 @@ const (
 	ACTION_REQUEST_TIME       = "ActionRequestTime"
 
 	SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER = "SuccessfullyNewFacesRequestCounter"
-	FAILED_NEW_FACES_REQUEST_COUNTER = "FailedNewFacesRequestCounter"
+	FAILED_NEW_FACES_REQUEST_COUNTER       = "FailedNewFacesRequestCounter"
 
 	SUCCESSFULLY_LMM_REQUEST_COUNTER = "SuccessfullyLmmRequestCounter"
-	FAILED_LMM_REQUEST_COUNTER = "FailedLmmRequestCounter"
+	FAILED_LMM_REQUEST_COUNTER       = "FailedLmmRequestCounter"
+
+	NEW_FACES_AFTER_ACTION_RESPONSE_TIME   = "NewFacesResponseTime-AfterActions"
+	NEW_FACES_AFTER_ACTION_REQUEST_COUNTER = "NewFacesRequestCounter-AfterActions"
+
+	LMM_RESPONSE_AFTER_ACTION_TIME   = "LmmResponseTime-AfterActions"
+	LMM_AFTER_ACTION_REQUEST_COUNTER = "LmmRequestCounter-AfterActions"
 )
 
 func InitConfig(env string) {
@@ -48,10 +54,16 @@ func InitConfig(env string) {
 		fmt.Printf("error open file : %v", err)
 		os.Exit(-1)
 	}
+	debugFile, err := os.OpenFile(fmt.Sprintf("%s-debug-log.out", env), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Printf("error open debug file : %v", err)
+		os.Exit(-1)
+	}
 	multi := io.MultiWriter(os.Stdout, file)
+	multiDebug := io.MultiWriter(os.Stdout, debugFile)
 	INFO = log.New(multi, fmt.Sprintf("%s-INFO: ", env), log.Ldate|log.Ltime|log.Lshortfile)
 	ERROR = log.New(multi, fmt.Sprintf("%s-ERROR: ", env), log.Ldate|log.Ltime|log.Lshortfile)
-	DEBUG = log.New(os.Stdout, fmt.Sprintf("%s-DEBUG: ", env), log.Ldate|log.Ltime|log.Lshortfile)
+	DEBUG = log.New(multiDebug, fmt.Sprintf("%s-DEBUG: ", env), log.Ldate|log.Ltime|log.Lshortfile)
 
 	expvar.Publish(USER_COUNTER, metric.NewCounter())
 	expvar.Publish(CREATE_USER_TIME, metric.NewHistogram())
@@ -68,4 +80,10 @@ func InitConfig(env string) {
 	expvar.Publish(FAILED_NEW_FACES_REQUEST_COUNTER, metric.NewCounter())
 	expvar.Publish(SUCCESSFULLY_LMM_REQUEST_COUNTER, metric.NewCounter())
 	expvar.Publish(FAILED_LMM_REQUEST_COUNTER, metric.NewCounter())
+
+	expvar.Publish(NEW_FACES_AFTER_ACTION_REQUEST_COUNTER, metric.NewCounter())
+	expvar.Publish(NEW_FACES_AFTER_ACTION_RESPONSE_TIME, metric.NewHistogram())
+	expvar.Publish(LMM_AFTER_ACTION_REQUEST_COUNTER, metric.NewCounter())
+	expvar.Publish(LMM_RESPONSE_AFTER_ACTION_TIME, metric.NewHistogram())
+
 }

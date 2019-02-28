@@ -28,7 +28,7 @@ const (
 	MessageActionType = "MESSAGE"
 )
 
-func NewFacesMethod(token string, lastActionTime int64) []commons.Profile {
+func NewFacesMethod(token string, lastActionTime int64, wasActionSent bool) []commons.Profile {
 	startTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 	for {
 		ok, resp := GetNewFaces(token, PhotoResolution1080x1440, lastActionTime)
@@ -38,11 +38,15 @@ func NewFacesMethod(token string, lastActionTime int64) []commons.Profile {
 			expvar.Get(NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 			expvar.Get(NEW_FACES_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
 			DEBUG.Printf("new faces request was successfull with profiles num [%d]", len(resp.Profiles))
+			if wasActionSent {
+				expvar.Get(NEW_FACES_AFTER_ACTION_REQUEST_COUNTER).(metric.Metric).Add(1)
+				expvar.Get(NEW_FACES_AFTER_ACTION_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
+			}
 			return resp.Profiles
 		}
 		if ok && resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("new faces return repeat after sec [%v]", resp.RepeatRequestAfter)
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
 			expvar.Get(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 		}
 		if !ok {
@@ -54,7 +58,7 @@ func NewFacesMethod(token string, lastActionTime int64) []commons.Profile {
 }
 
 //return likes, matched and messages
-func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons.Profile, []commons.Profile) {
+func LMMMethod(token string, lastActionTime int64, wasActionSent bool) ([]commons.Profile, []commons.Profile, []commons.Profile) {
 	startTime := time.Now().Round(time.Millisecond).UnixNano() / 1000000
 	for {
 		ok, resp := GetLMM(token, PhotoResolution1440x1920, lastActionTime)
@@ -65,12 +69,16 @@ func LMMMethod(token string, lastActionTime int64) ([]commons.Profile, []commons
 			expvar.Get(LMM_RESPONSE_TIME).(metric.Metric).Add(float64(finishTime - startTime))
 			DEBUG.Printf("lmm request was successfull with likes num [%d], matches num [%d], messages num [%d]",
 				len(resp.LikesYou), len(resp.Matches), len(resp.Messages))
+			if wasActionSent {
+				expvar.Get(LMM_AFTER_ACTION_REQUEST_COUNTER).(metric.Metric).Add(1)
+				expvar.Get(LMM_RESPONSE_AFTER_ACTION_TIME).(metric.Metric).Add(float64(finishTime - startTime))
+			}
 			return resp.LikesYou, resp.Matches, resp.Messages
 		}
 		if resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("lmm return repeat after sec [%v]", resp.RepeatRequestAfter)
 			expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
 		}
 		if !ok {
 			DEBUG.Printf("failed llm request, drop counter and repeat")

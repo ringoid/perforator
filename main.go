@@ -66,8 +66,8 @@ func main() {
 	DEBUG.Printf("run user lifecycle")
 	//run user lifecycle
 	finishUserJobChan := make(chan int)
-	for _, each := range tokens {
-		go userJob(each, finishUserJobChan)
+	for index, each := range tokens {
+		go userJob(index, each, finishUserJobChan)
 	}
 
 	//just wait while user's new faces feed will be empty for everybody
@@ -98,4 +98,8 @@ func printResults() {
 	INFO.Printf("%s counter : %v", SUCCESSFULLY_LMM_REQUEST_COUNTER, expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric))
 	INFO.Printf("%s counter : %v", FAILED_LMM_REQUEST_COUNTER, expvar.Get(FAILED_LMM_REQUEST_COUNTER).(metric.Metric))
 
+	INFO.Printf("%s counter : %v", NEW_FACES_AFTER_ACTION_REQUEST_COUNTER, expvar.Get(NEW_FACES_AFTER_ACTION_REQUEST_COUNTER).(metric.Metric))
+	INFO.Printf("%s histogram : %v", NEW_FACES_AFTER_ACTION_RESPONSE_TIME, expvar.Get(NEW_FACES_AFTER_ACTION_RESPONSE_TIME).(metric.Metric))
+	INFO.Printf("%s counter : %v", LMM_AFTER_ACTION_REQUEST_COUNTER, expvar.Get(LMM_AFTER_ACTION_REQUEST_COUNTER).(metric.Metric))
+	INFO.Printf("%s histogram : %v", LMM_RESPONSE_AFTER_ACTION_TIME, expvar.Get(LMM_RESPONSE_AFTER_ACTION_TIME).(metric.Metric))
 }
