@@ -46,13 +46,15 @@ func NewFacesMethod(token string, lastActionTime int64, wasActionSent bool) []co
 		}
 		if ok && resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("new faces return repeat after sec [%v]", resp.RepeatRequestAfter)
-			time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
+			//time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
+			time.Sleep(time.Millisecond * 100)
 			expvar.Get(SUCCESSFULLY_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 		}
 		if !ok {
 			DEBUG.Printf("failed new faces request, drop counter and repeat")
 			expvar.Get(FAILED_NEW_FACES_REQUEST_COUNTER).(metric.Metric).Add(1)
 			startTime = time.Now().Round(time.Millisecond).UnixNano() / 1000000
+			time.Sleep(time.Millisecond * 500)
 		}
 	}
 }
@@ -78,11 +80,13 @@ func LMMMethod(token string, lastActionTime int64, wasActionSent bool) ([]common
 		if resp != nil && resp.RepeatRequestAfter != 0 {
 			DEBUG.Printf("lmm return repeat after sec [%v]", resp.RepeatRequestAfter)
 			expvar.Get(SUCCESSFULLY_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
-			time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
+			time.Sleep(time.Millisecond * 100)
+			//time.Sleep(time.Millisecond * time.Duration(resp.RepeatRequestAfter))
 		}
 		if !ok {
 			DEBUG.Printf("failed llm request, drop counter and repeat")
 			expvar.Get(FAILED_LMM_REQUEST_COUNTER).(metric.Metric).Add(1)
+			time.Sleep(time.Millisecond * 500)
 			startTime = time.Now().Round(time.Millisecond).UnixNano() / 1000000
 		}
 	}
@@ -105,7 +109,7 @@ func ActionMethod(token string, sourceActions []Action) int64 {
 			DEBUG.Printf("actions request was successfull with actions num [%d]", len(sourceActions))
 			return resp.LastActionTime
 		}
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 1000)
 	}
 }
 
